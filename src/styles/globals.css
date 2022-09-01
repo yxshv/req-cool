@@ -12,6 +12,11 @@
     src: url(/cool-font.otf);
 }
 
+@font-face {
+    font-family: "JetFont";
+    src: url(/jet-font.ttf);
+}
+
 html,
 body {
   @apply scroll-smooth;
@@ -20,4 +25,8 @@ body {
 
 .cool {
     font-family: NicerFont, sans-serif;
+}
+
+.code {
+    font-family: "JetFont", monospace !important;
 }

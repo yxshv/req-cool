@@ -1,7 +1,14 @@
 import { AnimateSharedLayout, motion } from "framer-motion";
 import type { NextPage } from "next";
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/ext-language_tools";
 import Head from "next/head";
 import { useState } from "react";
+import dynamic from "next/dynamic";
+
+const Ace = dynamic(() => import('react-ace'), {
+  ssr: false
+})
 
 const Home: NextPage = () => {
 
@@ -69,6 +76,7 @@ const Home: NextPage = () => {
                 </AnimateSharedLayout>
               </div>
               {tab === 0 && <AuthTab />}
+              {tab === 1 && <ContentTab />}
             </div>
           </div>
         </div>
@@ -106,16 +114,70 @@ const TabBtn = ({ tab, text, my, setTab }: {
 }
 
 const AuthTab = () => {
+
+  const [auth, setAuth] = useState<"basic" | "bearer" | "custom">("bearer");
+
   return (
     <div className="mt-2 w-full p-5 rounded-md">
-      <div className="flex gap-3 justify-center items-start">
-        <h1 className="text-lg mt-2">Token</h1>
-        <div className="flex flex-col w-full">
-          <input className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none"/>
-          <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request. Read more about HTTP Authentication.</p>
+      <form className="flex gap-5 justify-center items-center mb-5">
+        <div className="flex gap-2 justify-center items-center">
+          <input defaultChecked onClick={() => setAuth("bearer")} name="auth-radio" value="bearer-radio" type="radio" className="accent-purple-400" /><label>Bearer Token</label>
         </div>
-      </div>
+        <div className="flex gap-2 justify-center items-center">
+          <input onClick={() => setAuth("basic")} name="auth-radio" value="basic-radio" type="radio" className="accent-purple-400" /><label>Basic Auth</label>
+        </div>
+        <div className="flex gap-2 justify-center items-center">
+          <input onClick={() => setAuth("custom")} name="auth-radio" value="custom-radio" type="radio" className="accent-purple-400" /><label>Custom</label>
+        </div>
+      </form>
+      {auth === "bearer" && (
+        <div className="flex gap-3 justify-center items-start">
+          <h1 className="text-lg mt-2">Token</h1>
+          <div className="flex flex-col w-full">
+            <input className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+            <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
+          </div>
+        </div>
+      )}
+      {auth === "basic" && (
+        <div className="flex flex-col gap-2 items-center justify-center">
+          <h1 className="text-lg font-bold">Basic Authorization</h1>
+          <input placeholder="Username" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+          <input placeholder="Password" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+          <p className="text-xs mt-1 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
+        </div>
+      )}
+      {auth === "custom" && (
+        <div className="flex gap-3 justify-center items-start">
+          <h1 className="text-lg mt-2">Authorization</h1>
+          <div className="flex flex-col w-full">
+            <input className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+            <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
+          </div>
+        </div>
+      )}
 
+    </div>
+  )
+}
+
+const ContentTab = () => {
+
+  const [val, setVal] = useState("{}");
+
+  return (
+    <div className="mt-2 w-full p-5 rounded-md">
+      <Ace
+        mode="json"
+        onChange={(v) => setVal(v)}
+        name="code-haha"
+        editorProps={{ $blockScrolling: true }}
+        setOptions={{
+          enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+          enableSnippets: true
+        }}
+      />
     </div>
   )
 }

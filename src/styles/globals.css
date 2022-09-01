@@ -3,12 +3,21 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: "Magnat";
-    src: url("/font.otf");
+    font-family: "NiceFont";
+    src: url(/font.otf);
+}
+
+@font-face {
+    font-family: "NicerFont";
+    src: url(/cool-font.otf);
 }
 
 html,
 body {
   @apply scroll-smooth;
-  font-family: Magnat, 'Albert Sans', sans-serif;
+  font-family: NiceFont, sans-serif;
+}
+
+.cool {
+    font-family: NicerFont, sans-serif;
 }

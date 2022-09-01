@@ -1,7 +1,12 @@
+import { AnimateSharedLayout, motion } from "framer-motion";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useState } from "react";
 
 const Home: NextPage = () => {
+
+  const [tab, setTab] = useState(0);
+
   return (
     <>
       <Head>
@@ -10,13 +15,109 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="min-h-screen text-light-dark py-7 bg-dark">
-        <h1 className="hover:underline hover:decoration-wavy decoration-1 underline-offset-2 decoration-purple-500 font-extrabold text-5xl text-center text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-purple-400 to-pink-200 animate-gradient-text">
-          ReqCool
-        </h1>
+      <div className="px-2 min-h-screen text-light-dark py-7 bg-dark">
+        <div className="flex justify-center items-center">
+          <button className="cool hover:underline hover:decoration-wavy decoration-1 underline-offset-2 decoration-purple-400 font-extrabold text-5xl text-center text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-purple-400 to-pink-200 animate-gradient-text">
+            ReqCool
+          </button>
+        </div>
+
+        <div className="flex w-full mt-5 justify-center items-center">
+          <div className="w-full md:max-w-[600px]">
+            <div className="gap-1 flex">
+              <input placeholder="https://" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+              <select
+                className="bg-dark-light text-purple-400 px-2 py-2 rounded-md focus:outline-none focus:border-purple-400 border-2 border-transparent"
+              >
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETE</option>
+                <option>HEAD</option>
+                <option>OPTIONS</option>
+              </select>
+              <button
+                className="px-3 focus:outline-none focus:bg-purple-400 py-2 rounded-md border-2 border-purple-400 hover:bg-purple-400 bg-dark-light"
+              >
+                Send
+              </button>
+            </div>
+
+            <div className="mt-5">
+              <div className="flex gap-1">
+                <AnimateSharedLayout>
+
+                  <TabBtn
+                    text="Authorization"
+                    tab={tab}
+                    setTab={setTab}
+                    my={0}
+                  />
+                  <TabBtn
+                    text="Content"
+                    tab={tab}
+                    setTab={setTab}
+                    my={1}
+                  />
+                  <TabBtn
+                    text="Headers"
+                    tab={tab}
+                    setTab={setTab}
+                    my={2}
+                  />
+                </AnimateSharedLayout>
+              </div>
+              {tab === 0 && <AuthTab />}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
 };
+
+const TabBtn = ({ tab, text, my, setTab }: {
+  tab: number;
+  my: number;
+  text: React.ReactNode;
+  setTab: (tab: number) => void;
+}) => {
+
+  const spring = {
+    type: "spring",
+    stiffness: 500,
+    damping: 30,
+  };
+
+  return (
+    <button className={`px-4 relative py-2 rounded-md`} onClick={() => setTab(my)}>
+      {tab === my &&
+        <motion.div
+          layoutId="onTab"
+          initial={false}
+          transition={spring}
+          className="absolute top-0 left-0 w-full h-full bg-purple-100/5 rounded-md"
+        />
+      }
+      <h1 className="text-white">{text}</h1>
+    </button>
+  )
+}
+
+const AuthTab = () => {
+  return (
+    <div className="mt-2 w-full p-5 rounded-md">
+      <div className="flex gap-3 justify-center items-start">
+        <h1 className="text-lg mt-2">Token</h1>
+        <div className="flex flex-col w-full">
+          <input className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none"/>
+          <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request. Read more about HTTP Authentication.</p>
+        </div>
+      </div>
+
+    </div>
+  )
+}
 
 export default Home;

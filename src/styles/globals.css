@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "Magnat";
+    src: url("/font.otf");
+}
+
+html,
+body {
+  @apply scroll-smooth;
+  font-family: Magnat, 'Albert Sans', sans-serif;
+}

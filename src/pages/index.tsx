@@ -1,27 +1,17 @@
-import { AnimateSharedLayout, motion } from "framer-motion";
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { AnimateSharedLayout } from "framer-motion";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import CodeMirror from '@uiw/react-codemirror';
-import { json } from '@codemirror/lang-json';
-import { html } from '@codemirror/lang-html';
-import { xml } from '@codemirror/lang-xml';
-import { dracula } from '@uiw/codemirror-theme-dracula';
-
-interface Content {
-  type: "application/x-www-form-urlencoded" | "application/json" | "text/html" | "application/xml" | "text/plain" | "custom";
-  content: string
-}
-
-interface Auth {
-  selected: "none" | "bearer" | "basic" | "custom";
-  bearer: string;
-  basic: {
-    username: string;
-    password: string;
-  };
-  custom: string
-}
+import Modal from "../components/Modal";
+import TabBtn from "../components/TabBtn";
+import AuthTab from "../components/Tabs/AuthTab";
+import ContentTab from "../components/Tabs/ContentTab";
+import HeadersTab from "../components/Tabs/HeadersTab";
+import { Auth, Content } from "../types";
+import Error from "../components/Error";
 
 const Home: NextPage = () => {
 
@@ -36,10 +26,23 @@ const Home: NextPage = () => {
     custom: ""
   });
   const [content, setContent] = useState<Content>({
-    type: "application/x-www-form-urlencoded",
-    content: ""
+    type: "application/json",
+    content: "{}"
   });
-  const [headers, setHeaders] = useState("");
+  const [headers, setHeaders] = useState("{}");
+
+  const [url, setUrl] = useState("");
+  const [method, setMethod] = useState<"GET" | "POST" | "PUT" | "PATCH" | "OPTIONS" | "DELETE" | "HEAD">("GET");
+  const [open, setOpen] = useState(false);
+
+  const [resp, setResp] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (url.trim() === "" || ( !url.startsWith("http://") && !url.startsWith("https://") )) setError("Invalid URL");
+    else setError(null);
+  },[url])
 
   return (
     <>
@@ -50,6 +53,53 @@ const Home: NextPage = () => {
       </Head>
 
       <div className="px-2 min-h-screen text-light-dark py-7 bg-dark">
+        <Modal open={open} setOpen={setOpen}>
+          {resp && (
+            <>
+              <div className="mt-4 flex flex-col gap-2">
+                <div className="flex justify-center items-center gap-5">
+                  <div
+                    className={`
+                      ${(`${resp.status}`).startsWith("2") && "text-green-500"} 
+                      ${(`${resp.status}`).startsWith("4") || (`${resp.status}`).startsWith("5") && "text-red-500"}
+                      ${(`${resp.status}`).startsWith("1") || (`${resp.status}`).startsWith("3") && "text-yellow-400"}
+
+                      flex justify-center items-center gap-1 text-xl
+
+                    `}
+                  >
+                    <svg width="1em" height="1em" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10s10-4.47 10-10S17.53 2 12 2z" />
+                    </svg>
+                    {resp.status}
+                  </div>
+                  <div
+                    className={`
+                      ${resp.time_taken < 1000 && "text-green-500"} 
+                      ${resp.time_taken > 5000 && "text-red-500"}
+
+                      flex justify-center items-center gap-1 text-xl
+
+                    `}
+                  >
+                    <svg width="1em" height="1em" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10s10-4.47 10-10S17.53 2 12 2z" />
+                    </svg>
+                    {resp.time_taken}ms
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          {loading && (
+            <div className="flex w-full h-[200px] justify-center items-center">
+              <svg className="-ml-1 mr-3 h-5 w-5 text-purple-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          )}
+        </Modal>
         <div className="flex justify-center items-center">
           <button className="cool hover:underline hover:decoration-wavy decoration-1 underline-offset-2 decoration-purple-400 font-extrabold text-5xl text-center text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-purple-400 to-pink-200 animate-gradient-text">
             ReqCool
@@ -58,9 +108,12 @@ const Home: NextPage = () => {
 
         <div className="flex w-full mt-5 justify-center items-center">
           <div className="w-full md:max-w-[600px]">
+            <Error error={error} />
             <div className="gap-1 flex">
-              <input placeholder="https://" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+              <input onChange={(e) => setUrl(e.target.value)} placeholder="https://" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
               <select
+                // @ts-ignore
+                onChange={(e) => setMethod(e.target.value)}
                 className="bg-dark-light text-purple-400 px-2 py-2 rounded-md focus:outline-none focus:border-purple-400 border-2 border-transparent"
               >
                 <option>GET</option>
@@ -72,6 +125,23 @@ const Home: NextPage = () => {
                 <option>OPTIONS</option>
               </select>
               <button
+                onClick={async () => {
+                  if (error) {
+                    setError(prev => prev);
+                    return;
+                  }
+                  setLoading(true);
+                  setOpen(true);
+                  const resp = await fetch(`/api/make_request`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                      url: url, method: method, headers: headers, auth: auth, content: content
+                    })
+                  })
+                  const data = await resp.json();
+                  setResp(data);
+                  setLoading(false)
+                }}
                 className="px-3 focus:outline-none focus:bg-purple-400 py-2 rounded-md border-2 border-purple-400 hover:bg-purple-400 bg-dark-light"
               >
                 Send
@@ -102,7 +172,6 @@ const Home: NextPage = () => {
                   />
                 </AnimateSharedLayout>
               </div>
-              {JSON.stringify(auth)}
               {tab === 0 && <AuthTab val={auth} setVal={setAuth} />}
               {tab === 1 && <ContentTab val={content} setVal={setContent} />}
               {tab === 2 && <HeadersTab val={headers} setVal={setHeaders} />}
@@ -113,179 +182,5 @@ const Home: NextPage = () => {
     </>
   );
 };
-
-const TabBtn = ({ tab, text, my, setTab }: {
-  tab: number;
-  my: number;
-  text: React.ReactNode;
-  setTab: (tab: number) => void;
-}) => {
-
-  const spring = {
-    type: "spring",
-    stiffness: 500,
-    damping: 30,
-  };
-
-  return (
-    <button className={`px-4 relative py-2 rounded-md`} onClick={() => setTab(my)}>
-      {tab === my &&
-        <motion.div
-          layoutId="onTab"
-          initial={false}
-          transition={spring}
-          className="absolute top-0 left-0 w-full h-full bg-purple-100/5 rounded-md"
-        />
-      }
-      <h1 className="text-white">{text}</h1>
-    </button>
-  )
-}
-
-const AuthTab = ({ val, setVal }: {
-  val: any;
-  setVal: any;
-}) => {
-
-  const [auth, setAuth] = useState<"basic" | "bearer" | "custom">("bearer");
-
-  useEffect(() => {
-    setVal({ ...val, selected: auth });
-  }, [auth])
-
-  return (
-    <div className="mt-2 w-full p-5 rounded-md">
-      <form className="flex gap-5 justify-center items-center mb-5">
-        <div className="flex gap-2 justify-center items-center">
-          <input defaultChecked onClick={() => setAuth("bearer")} name="auth-radio" value="bearer-radio" type="radio" className="accent-purple-400" /><label>Bearer Token</label>
-        </div>
-        <div className="flex gap-2 justify-center items-center">
-          <input onClick={() => setAuth("basic")} name="auth-radio" value="basic-radio" type="radio" className="accent-purple-400" /><label>Basic Auth</label>
-        </div>
-        <div className="flex gap-2 justify-center items-center">
-          <input onClick={() => setAuth("custom")} name="auth-radio" value="custom-radio" type="radio" className="accent-purple-400" /><label>Custom</label>
-        </div>
-      </form>
-      {auth === "bearer" && (
-        <div className="flex gap-3 justify-center items-start">
-          <h1 className="text-lg mt-2">Token</h1>
-          <div className="flex flex-col w-full">
-            <input onChange={(e) => {
-              setVal((prev: any) => {
-                return {
-                  ...prev,
-                  bearer: `Bearer ${e.target.value}`
-                }
-              })
-            }} className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
-            <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
-          </div>
-        </div>
-      )}
-      {auth === "basic" && (
-        <div className="flex flex-col gap-2 items-center justify-center">
-          <h1 className="text-lg font-bold">Basic Authorization</h1>
-          <input onChange={(e) => {
-            setVal((prev: any) => {
-              return {
-                ...prev,
-                basic: {
-                  password: prev.basic.password,
-                  username: e.target.value
-                }
-              }
-            })
-          }} placeholder="Username" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
-          <input onChange={(e) => {
-            setVal((prev: any) => {
-              return {
-                ...prev,
-                basic: {
-                  password: e.target.value,
-                  username: prev.basic.username
-                }
-              }
-            })
-          }} placeholder="Password" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
-          <p className="text-xs mt-1 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
-        </div>
-      )}
-      {auth === "custom" && (
-        <div className="flex gap-3 justify-center items-start">
-          <h1 className="text-lg mt-2">Authorization</h1>
-          <div className="flex flex-col w-full">
-            <input onChange={(e) => {
-              setVal((prev: any) => {
-                return {
-                  ...prev,
-                  custom: e.target.value
-                }
-              })
-            }} className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
-            <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
-          </div>
-        </div>
-      )}
-
-    </div>
-  )
-}
-
-const ContentTab = ({ val, setVal }: {
-  val: Content;
-  setVal: (val: any) => void;
-}) => {
-
-  const [v, setV] = useState("FORM URL Encoded (application/x-www-form-urlencoded)");
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let lang: Array<any> = [];
-
-  if (v.startsWith("JSON")) lang = [json()];
-  else if (v.startsWith("XML")) lang = [xml()];
-  else if (v.startsWith("HTML")) lang = [html()];
-  else lang = [];
-
-  return (
-    <div className="mt-2 w-full p-5 rounded-md">
-      <select
-        onChange={(e) => setV(e.target.value)}
-        className="my-3 bg-dark-light w-full text-purple-400 px-2 py-2 rounded-md focus:outline-none focus:border-purple-400 border-2 border-transparent"
-      >
-        <option>FORM URL Encoded (application/x-www-form-urlencoded)</option>
-        <option>JSON (application/json)</option>
-        <option>HTML (text/html)</option>
-        <option>XML (application/xml)</option>
-        <option>TEXT (text/plain)</option>
-        <option>CUSTOM (from Headers)</option>
-      </select>
-      <CodeMirror
-        value={val.content}
-        height="200px"
-        theme={dracula}
-        onChange={setVal}
-        extensions={lang}
-      />
-    </div>
-  )
-}
-
-const HeadersTab = ({ val, setVal }: {
-  val: string;
-  setVal: (val: string) => void;
-}) => {
-
-  return (
-    <div className="mt-2 w-full p-5 rounded-md">
-      <CodeMirror
-        value={val}
-        height="200px"
-        theme={dracula}
-        onChange={setVal}
-        extensions={[json()]}
-      />
-    </div>
-  )
-}
 
 export default Home;

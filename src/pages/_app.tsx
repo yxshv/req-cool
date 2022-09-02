@@ -3,7 +3,7 @@ import type { AppType } from "next/dist/shared/lib/utils";
 
 const MyApp: AppType = ({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { ...pageProps },
 }) => {
   return (
     <Component {...pageProps} />

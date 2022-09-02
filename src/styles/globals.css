@@ -19,8 +19,8 @@
 
 html,
 body {
-  @apply scroll-smooth;
-  font-family: NiceFont, sans-serif;
+    @apply scroll-smooth;
+    font-family: NiceFont, sans-serif;
 }
 
 .cool {
@@ -29,4 +29,34 @@ body {
 
 .code {
     font-family: "JetFont", monospace !important;
+}
+
+.animate-gradient-text {
+    animation: gradient-text 5s ease infinite;
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out;
+}
+
+@keyframes gradient-text {
+    0%, 100% {
+        background-size: 200% 200%;
+        background-position: left center;
+    },
+    50% {
+        background-size: 200% 200%;
+        background-position: right center;
+    }
+}
+
+@keyframes fade-in-up {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    },
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

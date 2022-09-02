@@ -52,14 +52,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const data = await resp.text();
 
-    const size;
-
     res.status(200).json({
         status: resp.status,
         headers: resp.headers,
         content: data,
         resp, time_taken,
-        size: file.byteLength
+        size: (parseInt(resp.headers.get("content-length") ?? "0") / 1024).toFixed(2)
     })
 
 }

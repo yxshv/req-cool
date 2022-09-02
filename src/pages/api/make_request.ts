@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import prettier from "prettier";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   
@@ -57,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         headers: resp.headers,
         content: data,
         resp, time_taken,
-        size: (parseInt(resp.headers.get("content-length") ?? "0") / 1024).toFixed(2)
+        size: ((Buffer.from(data).length) / 1024).toFixed(2)
     })
 
 }

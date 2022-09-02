@@ -8,11 +8,37 @@ import { html } from '@codemirror/lang-html';
 import { xml } from '@codemirror/lang-xml';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 
+interface Content {
+  type: "application/x-www-form-urlencoded" | "application/json" | "text/html" | "application/xml" | "text/plain" | "custom";
+  content: string
+}
+
+interface Auth {
+  selected: "none" | "bearer" | "basic" | "custom";
+  bearer: string;
+  basic: {
+    username: string;
+    password: string;
+  };
+  custom: string
+}
+
 const Home: NextPage = () => {
 
   const [tab, setTab] = useState(0);
-  const [auth, setAuth] = useState("");
-  const [content, setContent] = useState("");
+  const [auth, setAuth] = useState<Auth>({
+    selected: "none",
+    bearer: "",
+    basic: {
+      username: "",
+      password: ""
+    },
+    custom: ""
+  });
+  const [content, setContent] = useState<Content>({
+    type: "application/x-www-form-urlencoded",
+    content: ""
+  });
   const [headers, setHeaders] = useState("");
 
   return (
@@ -76,6 +102,7 @@ const Home: NextPage = () => {
                   />
                 </AnimateSharedLayout>
               </div>
+              {JSON.stringify(auth)}
               {tab === 0 && <AuthTab val={auth} setVal={setAuth} />}
               {tab === 1 && <ContentTab val={content} setVal={setContent} />}
               {tab === 2 && <HeadersTab val={headers} setVal={setHeaders} />}
@@ -116,11 +143,15 @@ const TabBtn = ({ tab, text, my, setTab }: {
 }
 
 const AuthTab = ({ val, setVal }: {
-  val: string;
-  setVal: (val: string) => void;
+  val: any;
+  setVal: any;
 }) => {
 
   const [auth, setAuth] = useState<"basic" | "bearer" | "custom">("bearer");
+
+  useEffect(() => {
+    setVal({ ...val, selected: auth });
+  }, [auth])
 
   return (
     <div className="mt-2 w-full p-5 rounded-md">
@@ -139,7 +170,14 @@ const AuthTab = ({ val, setVal }: {
         <div className="flex gap-3 justify-center items-start">
           <h1 className="text-lg mt-2">Token</h1>
           <div className="flex flex-col w-full">
-            <input className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+            <input onChange={(e) => {
+              setVal((prev: any) => {
+                return {
+                  ...prev,
+                  bearer: `Bearer ${e.target.value}`
+                }
+              })
+            }} className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
             <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
           </div>
         </div>
@@ -147,8 +185,28 @@ const AuthTab = ({ val, setVal }: {
       {auth === "basic" && (
         <div className="flex flex-col gap-2 items-center justify-center">
           <h1 className="text-lg font-bold">Basic Authorization</h1>
-          <input placeholder="Username" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
-          <input placeholder="Password" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+          <input onChange={(e) => {
+            setVal((prev: any) => {
+              return {
+                ...prev,
+                basic: {
+                  password: prev.basic.password,
+                  username: e.target.value
+                }
+              }
+            })
+          }} placeholder="Username" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+          <input onChange={(e) => {
+            setVal((prev: any) => {
+              return {
+                ...prev,
+                basic: {
+                  password: e.target.value,
+                  username: prev.basic.username
+                }
+              }
+            })
+          }} placeholder="Password" className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
           <p className="text-xs mt-1 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
         </div>
       )}
@@ -156,7 +214,14 @@ const AuthTab = ({ val, setVal }: {
         <div className="flex gap-3 justify-center items-start">
           <h1 className="text-lg mt-2">Authorization</h1>
           <div className="flex flex-col w-full">
-            <input className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
+            <input onChange={(e) => {
+              setVal((prev: any) => {
+                return {
+                  ...prev,
+                  custom: e.target.value
+                }
+              })
+            }} className="w-full bg-dark-light rounded-md border-2 border-transparent flex-grow focus:border-purple-400 text-purple-400 px-3 py-2 focus:outline-none" />
             <p className="text-xs mt-2 text-light-dark/80">The authorization header will be automatically generated when you send the request.</p>
           </div>
         </div>
@@ -167,8 +232,8 @@ const AuthTab = ({ val, setVal }: {
 }
 
 const ContentTab = ({ val, setVal }: {
-  val: string;
-  setVal: (val: string) => void;
+  val: Content;
+  setVal: (val: any) => void;
 }) => {
 
   const [v, setV] = useState("FORM URL Encoded (application/x-www-form-urlencoded)");
@@ -195,7 +260,7 @@ const ContentTab = ({ val, setVal }: {
         <option>CUSTOM (from Headers)</option>
       </select>
       <CodeMirror
-        value={val}
+        value={val.content}
         height="200px"
         theme={dracula}
         onChange={setVal}

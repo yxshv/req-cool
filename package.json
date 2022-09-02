@@ -10,7 +10,13 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@codemirror/lang-html": "^6.1.0",
+    "@codemirror/lang-json": "^6.0.0",
+    "@codemirror/lang-xml": "^6.0.0",
+    "@codemirror/view": "^6.2.2",
     "@next-auth/prisma-adapter": "^1.0.4",
+    "@uiw/codemirror-theme-dracula": "^4.11.6",
+    "@uiw/react-codemirror": "^4.11.6",
     "ace-builds": "^1.10.0",
     "framer-motion": "^7.2.1",
     "next": "12.2.5",

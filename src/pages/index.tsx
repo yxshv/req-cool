@@ -1,14 +1,12 @@
 import { AnimateSharedLayout, motion } from "framer-motion";
 import type { NextPage } from "next";
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/ext-language_tools";
 import Head from "next/head";
 import { useState } from "react";
-import dynamic from "next/dynamic";
-
-const Ace = dynamic(() => import('react-ace'), {
-  ssr: false
-})
+import CodeMirror from '@uiw/react-codemirror';
+import { json } from '@codemirror/lang-json';
+import { html } from '@codemirror/lang-html';
+import { xml } from '@codemirror/lang-xml';
+import { dracula } from '@uiw/codemirror-theme-dracula';
 
 const Home: NextPage = () => {
 
@@ -163,20 +161,28 @@ const AuthTab = () => {
 
 const ContentTab = () => {
 
-  const [val, setVal] = useState("{}");
+  const [val, setVal] = useState("");
+  const [v, setV] = useState("");
 
   return (
     <div className="mt-2 w-full p-5 rounded-md">
-      <Ace
-        mode="json"
-        onChange={(v) => setVal(v)}
-        name="code-haha"
-        editorProps={{ $blockScrolling: true }}
-        setOptions={{
-          enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
-          enableSnippets: true
-        }}
+      <select
+        onChange={(e) => setV(e.target.value)}
+        className="my-3 bg-dark-light w-full text-purple-400 px-2 py-2 rounded-md focus:outline-none focus:border-purple-400 border-2 border-transparent"
+      >
+        <option>FORM URL Encoded (application/x-www-form-urlencoded)</option>
+        <option>JSON (application/json)</option>
+        <option>HTML (text/html)</option>
+        <option>XML (application/xml)</option>
+        <option>TEXT (text/plain)</option>
+        <option>CUSTOM (from Headers)</option>
+      </select>
+      <CodeMirror
+        value={val}
+        height="200px"
+        theme={dracula}
+        onChange={setVal}
+        extensions={[v.startsWith("FORM") ? html() : (v.startsWith("JSON") ? json(): json())]}
       />
     </div>
   )

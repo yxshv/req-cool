@@ -21,7 +21,7 @@ const Modal = ({
                         initial={{ scaleX: 0, scaleY: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         animate={{ scaleX: [0, 1, 1], scaleY: [0, 0.02, 0.02, 0.02, 1] }}
-                        className="bg-dark-light w-[90vw] h-[80vh] md:w-[60vw] md:h-[60vh] rounded-md p-5"
+                        className="bg-dark-light w-[90vw] h-[80vh] md:w-[60vw] md:h-[70vh] rounded-md p-5"
                     >
                         <div className="flex justify-between items-center">
                             <h1 className="text-2xl text-purple-400">Response</h1>

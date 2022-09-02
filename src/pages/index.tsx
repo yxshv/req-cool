@@ -1,7 +1,7 @@
 import { AnimateSharedLayout, motion } from "framer-motion";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { html } from '@codemirror/lang-html';
@@ -11,6 +11,9 @@ import { dracula } from '@uiw/codemirror-theme-dracula';
 const Home: NextPage = () => {
 
   const [tab, setTab] = useState(0);
+  const [auth, setAuth] = useState("");
+  const [content, setContent] = useState("");
+  const [headers, setHeaders] = useState("");
 
   return (
     <>
@@ -73,8 +76,9 @@ const Home: NextPage = () => {
                   />
                 </AnimateSharedLayout>
               </div>
-              {tab === 0 && <AuthTab />}
-              {tab === 1 && <ContentTab />}
+              {tab === 0 && <AuthTab val={auth} setVal={setAuth} />}
+              {tab === 1 && <ContentTab val={content} setVal={setContent} />}
+              {tab === 2 && <HeadersTab val={headers} setVal={setHeaders} />}
             </div>
           </div>
         </div>
@@ -111,7 +115,10 @@ const TabBtn = ({ tab, text, my, setTab }: {
   )
 }
 
-const AuthTab = () => {
+const AuthTab = ({ val, setVal }: {
+  val: string;
+  setVal: (val: string) => void;
+}) => {
 
   const [auth, setAuth] = useState<"basic" | "bearer" | "custom">("bearer");
 
@@ -159,10 +166,20 @@ const AuthTab = () => {
   )
 }
 
-const ContentTab = () => {
+const ContentTab = ({ val, setVal }: {
+  val: string;
+  setVal: (val: string) => void;
+}) => {
 
-  const [val, setVal] = useState("");
-  const [v, setV] = useState("");
+  const [v, setV] = useState("FORM URL Encoded (application/x-www-form-urlencoded)");
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let lang: Array<any> = [];
+
+  if (v.startsWith("JSON")) lang = [json()];
+  else if (v.startsWith("XML")) lang = [xml()];
+  else if (v.startsWith("HTML")) lang = [html()];
+  else lang = [];
 
   return (
     <div className="mt-2 w-full p-5 rounded-md">
@@ -182,7 +199,25 @@ const ContentTab = () => {
         height="200px"
         theme={dracula}
         onChange={setVal}
-        extensions={[v.startsWith("FORM") ? html() : (v.startsWith("JSON") ? json(): json())]}
+        extensions={lang}
+      />
+    </div>
+  )
+}
+
+const HeadersTab = ({ val, setVal }: {
+  val: string;
+  setVal: (val: string) => void;
+}) => {
+
+  return (
+    <div className="mt-2 w-full p-5 rounded-md">
+      <CodeMirror
+        value={val}
+        height="200px"
+        theme={dracula}
+        onChange={setVal}
+        extensions={[json()]}
       />
     </div>
   )

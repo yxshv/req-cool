@@ -50,11 +50,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         time_taken = Date.now() - start_time;
     }
 
+    const data = await resp.text();
+
+    const size;
+
     res.status(200).json({
         status: resp.status,
         headers: resp.headers,
-        content: await resp.text(),
-        resp, time_taken
+        content: data,
+        resp, time_taken,
+        size: file.byteLength
     })
 
 }

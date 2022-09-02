@@ -61,8 +61,8 @@ const Home: NextPage = () => {
                   <div
                     className={`
                       ${(`${resp.status}`).startsWith("2") && "text-green-500"} 
-                      ${(`${resp.status}`).startsWith("4") || (`${resp.status}`).startsWith("5") && "text-red-500"}
-                      ${(`${resp.status}`).startsWith("1") || (`${resp.status}`).startsWith("3") && "text-yellow-400"}
+                      ${((`${resp.status}`).startsWith("4") || (`${resp.status}`).startsWith("5")) && "text-red-500"}
+                      ${((`${resp.status}`).startsWith("1") || (`${resp.status}`).startsWith("3")) && "text-yellow-400"}
 
                       flex justify-center items-center gap-1 text-xl
 
@@ -75,7 +75,8 @@ const Home: NextPage = () => {
                   </div>
                   <div
                     className={`
-                      ${resp.time_taken < 1000 && "text-green-500"} 
+                      ${resp.time_taken < 1500 && "text-green-500"} 
+                      ${(resp.time_taken < 5000 && resp.time_taken > 1500) && "text-yellow-400"} 
                       ${resp.time_taken > 5000 && "text-red-500"}
 
                       flex justify-center items-center gap-1 text-xl
@@ -83,9 +84,24 @@ const Home: NextPage = () => {
                     `}
                   >
                     <svg width="1em" height="1em" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10s10-4.47 10-10S17.53 2 12 2z" />
+                      <path fill="currentColor" d="M10 3q-.425 0-.712-.288Q9 2.425 9 2t.288-.713Q9.575 1 10 1h4q.425 0 .713.287Q15 1.575 15 2t-.287.712Q14.425 3 14 3Zm2 11q.425 0 .713-.288Q13 13.425 13 13V9q0-.425-.287-.713Q12.425 8 12 8t-.712.287Q11 8.575 11 9v4q0 .425.288.712q.287.288.712.288Zm0 8q-1.85 0-3.488-.712q-1.637-.713-2.862-1.938t-1.938-2.862Q3 14.85 3 13t.712-3.488Q4.425 7.875 5.65 6.65t2.862-1.937Q10.15 4 12 4q1.55 0 2.975.5t2.675 1.45l.725-.725q.275-.275.675-.275t.7.3q.275.275.275.7q0 .425-.275.7l-.7.7Q20 8.6 20.5 10.025Q21 11.45 21 13q0 1.85-.712 3.488q-.713 1.637-1.938 2.862t-2.862 1.938Q13.85 22 12 22Zm0-2q2.9 0 4.95-2.05Q19 15.9 19 13q0-2.9-2.05-4.95Q14.9 6 12 6Q9.1 6 7.05 8.05Q5 10.1 5 13q0 2.9 2.05 4.95Q9.1 20 12 20Zm0-7Z" />
                     </svg>
                     {resp.time_taken}ms
+                  </div>
+                  <div
+                    className={`
+                      ${resp.time_taken < 1500 && "text-green-500"} 
+                      ${(resp.time_taken < 5000 && resp.time_taken > 1500) && "text-yellow-400"} 
+                      ${resp.time_taken > 5000 && "text-red-500"}
+
+                      flex justify-center items-center gap-1 text-xl
+
+                    `}
+                  >
+                    <svg width="1em" height="1em" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M10 3q-.425 0-.712-.288Q9 2.425 9 2t.288-.713Q9.575 1 10 1h4q.425 0 .713.287Q15 1.575 15 2t-.287.712Q14.425 3 14 3Zm2 11q.425 0 .713-.288Q13 13.425 13 13V9q0-.425-.287-.713Q12.425 8 12 8t-.712.287Q11 8.575 11 9v4q0 .425.288.712q.287.288.712.288Zm0 8q-1.85 0-3.488-.712q-1.637-.713-2.862-1.938t-1.938-2.862Q3 14.85 3 13t.712-3.488Q4.425 7.875 5.65 6.65t2.862-1.937Q10.15 4 12 4q1.55 0 2.975.5t2.675 1.45l.725-.725q.275-.275.675-.275t.7.3q.275.275.275.7q0 .425-.275.7l-.7.7Q20 8.6 20.5 10.025Q21 11.45 21 13q0 1.85-.712 3.488q-.713 1.637-1.938 2.862t-2.862 1.938Q13.85 22 12 22Zm0-2q2.9 0 4.95-2.05Q19 15.9 19 13q0-2.9-2.05-4.95Q14.9 6 12 6Q9.1 6 7.05 8.05Q5 10.1 5 13q0 2.9 2.05 4.95Q9.1 20 12 20Zm0-7Z" />
+                    </svg>
+                    {resp.size}
                   </div>
                 </div>
               </div>
@@ -126,6 +142,7 @@ const Home: NextPage = () => {
               </select>
               <button
                 onClick={async () => {
+                  setResp(null);
                   if (error) {
                     setError(prev => prev);
                     return;
